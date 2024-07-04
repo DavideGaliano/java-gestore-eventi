@@ -1,67 +1,116 @@
 package org.java.lessons.eventi;
 
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Inserisci il titolo del programma di eventi:");
+        String titoloProgramma = scanner.nextLine();
 
-        //form utente
-        
-        System.out.println("Inserisci il titolo dell'evento:");
-        String titolo = scanner.nextLine();
+        ProgrammaEventi programmaEventi = new ProgrammaEventi(titoloProgramma);
 
-        System.out.println("Inserisci la data dell'evento (dd-MM-yyyy):");
-        String data = scanner.nextLine();
+        while (true) {
+            System.out.println("\nMenu:");
+            System.out.println("1. Aggiungi evento");
+            System.out.println("2. Aggiungi concerto");
+            System.out.println("3. Visualizza tutti gli eventi");
+            System.out.println("4. Visualizza eventi per data");
+            System.out.println("5. Visualizza numero di eventi");
+            System.out.println("6. Svuota eventi");
+            System.out.println("7. Visualizza eventi ordinati per data");
+            System.out.println("8. Esci");
+            System.out.print("Scegli un'opzione: ");
+            int scelta = scanner.nextInt();
+            scanner.nextLine();
 
-        System.out.println("Inserisci il numero totale di posti:");
-        int numeroPostiTotali = scanner.nextInt();
+            switch (scelta) {
+                case 1:
+                    System.out.println("Inserisci il titolo dell'evento:");
+                    String titoloEvento = scanner.nextLine();
 
-        Evento evento = null;
-        try {
-            evento = new Evento(titolo, data, numeroPostiTotali); //Se il costruttore della classe Evento rileva un problema (come una data passata o un numero di posti totali non positivo), lancerà un'eccezione di tipo IllegalArgumentException
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage()); //messaggio di errore passato dal costruttore
-            System.exit(1);
-        }
+                    System.out.println("Inserisci la data dell'evento (dd-MM-yyyy):");
+                    String dataEvento = scanner.nextLine();
 
-        System.out.println("Vuoi fare prenotazioni? (si/no)");
-        scanner.nextLine(); 
-        String risposta = scanner.nextLine();
+                    System.out.println("Inserisci il numero totale di posti:");
+                    int numeroPostiTotali = scanner.nextInt();
 
-        if (risposta.equalsIgnoreCase("si")) {
-            System.out.println("Quante prenotazioni vuoi fare?");
-            int prenotazioni = scanner.nextInt(); //legge un numero intero inserito dall'utente e lo assegna alla variabile prenotazioni
-            for (int i = 0; i < prenotazioni; i++) {
-                String result = evento.prenota();
-                if (!result.equals("Prenotazione effettuata con successo.")) { //Se result non è uguale a "Prenotazione effettuata con successo.", significa che c'è stato un problema
-                    System.out.println(result);
+                    try {
+                        Evento evento = new Evento(titoloEvento, dataEvento, numeroPostiTotali);
+                        programmaEventi.aggiungiEvento(evento);
+                        System.out.println("Evento aggiunto con successo.");
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
+                    }
                     break;
-                }
+
+                case 2:
+                    System.out.println("Inserisci il titolo del concerto:");
+                    String titoloConcerto = scanner.nextLine();
+
+                    System.out.println("Inserisci la data del concerto (dd-MM-yyyy):");
+                    String dataConcerto = scanner.nextLine();
+
+                    System.out.println("Inserisci l'ora del concerto (HH:mm):");
+                    String oraConcerto = scanner.nextLine();
+
+                    System.out.println("Inserisci il numero totale di posti:");
+                    int numeroPostiConcerto = scanner.nextInt();
+
+                    System.out.println("Inserisci il prezzo del concerto:");
+                    double prezzoConcerto = scanner.nextDouble();
+
+                    try {
+                        Concerto concerto = new Concerto(titoloConcerto, dataConcerto, numeroPostiConcerto, oraConcerto, prezzoConcerto);
+                        programmaEventi.aggiungiEvento(concerto);
+                        System.out.println("Concerto aggiunto con successo.");
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+
+                case 3:
+                    System.out.println(programmaEventi);
+                    break;
+
+                case 4:
+                    System.out.println("Inserisci la data (dd-MM-yyyy):");
+                    String data = scanner.nextLine();
+                    List<Evento> eventiPerData = programmaEventi.getEventiOrdinatiPerData().stream()
+                                                                .filter(evento -> evento.getData().equals(data))
+                                                                .collect(Collectors.toList());//raccoglie tutti gli eventi filtrati in una nuova lista e la restituisce
+                    if (eventiPerData.isEmpty()) {
+                        System.out.println("Nessun evento trovato per la data specificata.");
+                    } else {
+                        eventiPerData.forEach(System.out::println);
+                    }
+                    break;
+
+                case 5:
+                    System.out.println("Numero di eventi: " + programmaEventi.getNumeroEventi());
+                    break;
+
+                case 6:
+                    programmaEventi.svuotaEventi();
+                    System.out.println("Tutti gli eventi sono stati rimossi.");
+                    break;
+
+                case 7:
+                    System.out.println("Eventi ordinati per data:");
+                    List<Evento> eventiOrdinati = programmaEventi.getEventiOrdinatiPerData();
+                    eventiOrdinati.forEach(System.out::println);
+                    break;
+
+                case 8:
+                    System.out.println("Uscita dal programma.");
+                    scanner.close();
+                    return;
+
+                default:
+                    System.out.println("Opzione non valida. Riprova.");
             }
         }
-
-        System.out.println("Posti prenotati: " + evento.getNumeroPostiPrenotati());
-        System.out.println("Posti disponibili: " + (evento.getNumeroPostiTotali() - evento.getNumeroPostiPrenotati()));
-
-        System.out.println("Vuoi disdire prenotazioni? (si/no)");
-        scanner.nextLine();
-        risposta = scanner.nextLine();
-
-        if (risposta.equalsIgnoreCase("si")) {
-            System.out.println("Quante prenotazioni vuoi disdire?");
-            int disdette = scanner.nextInt();
-            for (int i = 0; i < disdette; i++) {
-                String result = evento.disdici();
-                if (!result.equals("Prenotazione disdetta con successo.")) {
-                    System.out.println(result);
-                    break;
-                }
-            }
-        }
-
-        System.out.println("Posti prenotati: " + evento.getNumeroPostiPrenotati());
-        System.out.println("Posti disponibili: " + (evento.getNumeroPostiTotali() - evento.getNumeroPostiPrenotati()));
     }
 }
-
